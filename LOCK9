@@ -1,0 +1,147 @@
+-- I HATE BRAINROT Script OP keyless 2026 😈 😂
+-- discord.gg/A5NEZNPMCS
+
+task.wait()
+
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+
+--------------------------------------------------
+-- UI
+--------------------------------------------------
+local gui = Instance.new("ScreenGui")
+gui.Name = "I HATE BRAINROT LOCK9 GUN"
+gui.ResetOnSpawn = false
+gui.Parent = playerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 180)
+frame.Position = UDim2.new(0.5, -150, 0.5, -90)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.Parent = gui
+
+-- top bar
+local topBar = Instance.new("Frame", frame)
+topBar.Size = UDim2.new(1,0,0,30)
+topBar.BackgroundColor3 = Color3.fromRGB(45,45,45)
+
+local title = Instance.new("TextLabel", topBar)
+title.Size = UDim2.new(1,-30,1,0)
+title.Position = UDim2.new(0,5,0,0)
+title.Text = "REAL OP GUN"
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+
+local close = Instance.new("TextButton", topBar)
+close.Size = UDim2.new(0,30,1,0)
+close.Position = UDim2.new(1,-30,0,0)
+close.Text = "X"
+close.BackgroundColor3 = Color3.fromRGB(200,60,60)
+
+close.MouseButton1Click:Connect(function()
+	frame.Visible = false
+end)
+
+--------------------------------------------------
+-- DRAG SYSTEM
+--------------------------------------------------
+local dragging, dragStart, startPos
+
+topBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+		
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+topBar.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+--------------------------------------------------
+-- BUTTON
+--------------------------------------------------
+local toggle = Instance.new("TextButton", frame)
+toggle.Size = UDim2.new(0,220,0,50)
+toggle.Position = UDim2.new(0.5,-110,0.5,-25)
+toggle.Text = "ENABLE OP MODE"
+toggle.BackgroundColor3 = Color3.fromRGB(70,130,255)
+toggle.TextColor3 = Color3.new(1,1,1)
+
+--------------------------------------------------
+-- GUN FINDER
+--------------------------------------------------
+local function getGun()
+	local model = workspace:FindFirstChild(player.Name)
+	if not model then return end
+	
+	return model:FindFirstChild("LOCK9")
+end
+
+--------------------------------------------------
+-- MAIN LOOP
+--------------------------------------------------
+local running = false
+
+toggle.MouseButton1Click:Connect(function()
+	running = not running
+	toggle.Text = running and "DISABLE OP MODE" or "ENABLE OP MODE"
+
+	if running then
+		task.spawn(function()
+			while running do
+				local gun = getGun()
+
+				if gun then
+					-- 🔥 CURRENT STATS (attributes)
+					local current = gun:FindFirstChild("CurrentStats")
+					if current then
+						current:SetAttribute("magazineSize", 1e20)
+						current:SetAttribute("rateOfFire", 500000)
+						current:SetAttribute("rayRadius", 0.5)
+						current:SetAttribute("raysPerShot", 30)
+						current:SetAttribute("damage", 1e20)
+						current:SetAttribute("reloadTime", 0)
+						current:SetAttribute("spread", 0)
+					end
+
+					-- 🔥 BASE STATS (if values exist)
+					local base = gun:FindFirstChild("BaseStats")
+					if base then
+						for _,v in pairs(base:GetDescendants()) do
+							if v:IsA("NumberValue") then
+								v.Value = 1e20
+							end
+						end
+					end
+				end
+
+				task.wait()
+			end
+		end)
+	end
+end)
+
+print("discord.gg/A5NEZNPMCS")
+
+print("Subscribe @ActusisGames On Youtube 🙏")
+
+print("Does Everything Work? 👍")
+
+print("Full Script Loaded! 😈")
