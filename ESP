@@ -1,0 +1,129 @@
+--// LOADSTRING SAFE INIT
+repeat task.wait() until game:IsLoaded()
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+repeat task.wait() until LocalPlayer
+
+repeat task.wait() until Workspace.CurrentCamera
+local Camera = Workspace.CurrentCamera
+
+--// NOTIFICATION
+pcall(function()
+    StarterGui:SetCore("SendNotification", {
+        Title = "Esp ON",
+        Text = "By Actusis/Nricul",
+        Duration = 8.5
+    })
+end)
+
+--// SETTINGS
+local ENABLED = true
+local TOGGLE_KEY = Enum.KeyCode.RightShift
+local MAX_DISTANCE = 3500
+local CHECK_INTERVAL = 0.5
+
+--// FUNCTIONS
+local function sameTeam(plr)
+    return LocalPlayer.Team and plr.Team and LocalPlayer.Team == plr.Team
+end
+
+local function getDistance(char)
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return math.huge end
+    return (Camera.CFrame.Position - hrp.Position).Magnitude
+end
+
+local function calcTransparency(dist)
+    return math.clamp(0.3 + (dist / MAX_DISTANCE) * 0.5, 0.3, 0.8)
+end
+
+local function removeESP(char)
+    local esp = char:FindFirstChild("MockESP")
+    if esp then esp:Destroy() end
+end
+
+local function createESP(char, plr)
+    if not ENABLED then return end
+    if sameTeam(plr) then return end
+    if char:FindFirstChild("MockESP") then return end
+
+    local dist = getDistance(char)
+    if dist > MAX_DISTANCE then return end
+
+    local hl = Instance.new("Highlight")
+    hl.Name = "MockESP"
+    hl.Adornee = char
+    hl.FillColor = Color3.fromRGB(150, 35, 35)
+    hl.OutlineColor = Color3.fromRGB(110, 20, 20)
+    hl.FillTransparency = calcTransparency(dist)
+    hl.OutlineTransparency = 0.45
+    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    hl.Parent = char
+end
+
+local function handlePlayer(plr)
+    if plr == LocalPlayer then return end
+
+    local function onChar(char)
+        task.wait(0.5)
+        createESP(char, plr)
+    end
+
+    if plr.Character then
+        onChar(plr.Character)
+    end
+
+    plr.CharacterAdded:Connect(onChar)
+    plr.CharacterRemoving:Connect(removeESP)
+end
+
+--// INPUT
+UserInputService.InputBegan:Connect(function(i, gp)
+    if gp then return end
+    if i.KeyCode == TOGGLE_KEY then
+        ENABLED = not ENABLED
+        if not ENABLED then
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p.Character then
+                    removeESP(p.Character)
+                end
+            end
+        end
+    end
+end)
+
+--// LOOP
+task.spawn(function()
+    while true do
+        task.wait(CHECK_INTERVAL)
+        if not ENABLED then continue end
+
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+                local dist = getDistance(plr.Character)
+                if sameTeam(plr) or dist > MAX_DISTANCE then
+                    removeESP(plr.Character)
+                else
+                    createESP(plr.Character, plr)
+                    local esp = plr.Character:FindFirstChild("MockESP")
+                    if esp then
+                        esp.FillTransparency = calcTransparency(dist)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+--// INIT
+for _, p in ipairs(Players:GetPlayers()) do
+    handlePlayer(p)
+end
+
+Players.PlayerAdded:Connect(handlePlayer)
