@@ -129,3 +129,17 @@ local Button = ExtraTab:CreateButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Actusis-Nricul/helobrov2/refs/heads/main/humanflashlight"))()
    end,
 })
+
+local Button = ExtraTab:CreateButton({
+   Name = "Play Again",
+   Callback = function()
+        game:GetService("ReplicatedStorage").Events.PlayAgain:FireServer()
+   end,
+})
+
+local Button = ExtraTab:CreateButton({
+   Name = "Back To Lobby",
+   Callback = function()
+        game:GetService("ReplicatedStorage").Events.BackToLobby:FireServer()
+   end,
+})
