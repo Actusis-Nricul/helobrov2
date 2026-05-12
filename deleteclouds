@@ -1,0 +1,10 @@
+local workspace = game:GetService("Workspace")
+local environment = workspace:FindFirstChild("environment")
+
+if environment then
+    for _, child in ipairs(environment:GetChildren()) do
+        if child.Name ~= "zones" and child.Name ~= "tutorialhatch" then
+            child:Destroy()
+        end
+    end
+end
