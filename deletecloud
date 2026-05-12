@@ -1,0 +1,8 @@
+-- Script 2: Delete Workspace.Clouds
+
+local workspace = game:GetService("Workspace")
+local clouds = workspace:FindFirstChild("Clouds")
+
+if clouds then
+    clouds:Destroy()
+end
