@@ -1,4 +1,4 @@
 character = game:GetService("Players").LocalPlayer.Character
 pointLight = Instance.new("PointLight")
 pointLight.Parent = character.HumanoidRootPart
-Brightness = 500
+Brightness = 50000
