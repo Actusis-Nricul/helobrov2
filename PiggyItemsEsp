@@ -1,0 +1,127 @@
+local itemESP = false
+local espObjects = {}
+
+local itemNames = {
+	BlueKey = true,
+	RedKey = true,
+	GreenKey = true,
+	PurpleKey = true,
+	WhiteKey = true,
+	YellowKey = true,
+	OrangeKey = true,
+	Plank = true,
+	Wrench = true,
+	Hammer = true,
+	Battery = true,
+	Gun = true,
+	Ammo = true
+}
+
+local function removeESP(obj)
+
+	if espObjects[obj] then
+
+		if espObjects[obj].Highlight then
+			espObjects[obj].Highlight:Destroy()
+		end
+
+		if espObjects[obj].Billboard then
+			espObjects[obj].Billboard:Destroy()
+		end
+
+		espObjects[obj] = nil
+	end
+end
+
+local function createESP(obj)
+
+	if espObjects[obj] then
+		return
+	end
+
+	local highlight = Instance.new("Highlight")
+
+	highlight.FillColor = Color3.fromRGB(255,255,0)
+	highlight.OutlineColor = Color3.fromRGB(255,255,255)
+
+	highlight.FillTransparency = 0.3
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+	highlight.Adornee = obj
+	highlight.Parent = game.CoreGui
+
+	local billboard = Instance.new("BillboardGui")
+
+	billboard.Size = UDim2.new(0,120,0,35)
+	billboard.AlwaysOnTop = true
+	billboard.StudsOffset = Vector3.new(0,2,0)
+
+	billboard.Adornee = obj
+	billboard.Parent = game.CoreGui
+
+	local label = Instance.new("TextLabel")
+
+	label.Size = UDim2.new(1,0,1,0)
+
+	label.BackgroundTransparency = 1
+	label.Text = obj.Name
+
+	label.TextColor3 = Color3.fromRGB(255,255,0)
+	label.TextStrokeTransparency = 0
+
+	label.Font = Enum.Font.GothamBold
+	label.TextScaled = true
+
+	label.Parent = billboard
+
+	espObjects[obj] = {
+		Highlight = highlight,
+		Billboard = billboard
+	}
+end
+
+task.spawn(function()
+
+	while true do
+
+		if itemESP then
+
+			for _,v in pairs(workspace:GetDescendants()) do
+
+				if itemNames[v.Name] then
+
+					if v:IsA("Model") then
+
+						local pickup =
+							v:FindFirstChild("ItemPickupScript", true)
+
+						if pickup then
+							createESP(v)
+						else
+							removeESP(v)
+						end
+					end
+				end
+			end
+		end
+
+		task.wait(1)
+	end
+end)
+
+EspTab:CreateToggle({
+	Name = "ESP Items",
+	CurrentValue = false,
+	Flag = "ItemsESP",
+	Callback = function(Value)
+
+		itemESP = Value
+
+		if not itemESP then
+
+			for obj,_ in pairs(espObjects) do
+				removeESP(obj)
+			end
+		end
+	end,
+})
