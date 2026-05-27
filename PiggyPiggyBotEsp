@@ -1,0 +1,100 @@
+local piggyESP = false
+local piggyObjects = {}
+
+local function removePiggyESP(model)
+
+	if piggyObjects[model] then
+
+		if piggyObjects[model].Highlight then
+			piggyObjects[model].Highlight:Destroy()
+		end
+
+		if piggyObjects[model].Billboard then
+			piggyObjects[model].Billboard:Destroy()
+		end
+
+		piggyObjects[model] = nil
+	end
+end
+
+local function createPiggyESP(model)
+
+	if piggyObjects[model] then
+		return
+	end
+
+	local highlight = Instance.new("Highlight")
+
+	highlight.FillColor = Color3.fromRGB(255,0,0)
+	highlight.OutlineColor = Color3.fromRGB(255,255,255)
+
+	highlight.FillTransparency = 0.35
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+	highlight.Adornee = model
+	highlight.Parent = game.CoreGui
+
+	local billboard = Instance.new("BillboardGui")
+
+	billboard.Size = UDim2.new(0,120,0,35)
+	billboard.AlwaysOnTop = true
+	billboard.StudsOffset = Vector3.new(0,4,0)
+
+	billboard.Adornee = model
+	billboard.Parent = game.CoreGui
+
+	local label = Instance.new("TextLabel")
+
+	label.Size = UDim2.new(1,0,1,0)
+
+	label.BackgroundTransparency = 1
+	label.Text = "PIGGY"
+
+	label.TextColor3 = Color3.fromRGB(255,0,0)
+	label.TextStrokeTransparency = 0
+
+	label.Font = Enum.Font.GothamBold
+	label.TextScaled = true
+
+	label.Parent = billboard
+
+	piggyObjects[model] = {
+		Highlight = highlight,
+		Billboard = billboard
+	}
+end
+
+task.spawn(function()
+
+	while true do
+
+		if piggyESP then
+
+			for _,v in pairs(workspace:GetDescendants()) do
+
+				if v.Name == "PiggyBot" and v:IsA("Model") then
+					createPiggyESP(v)
+				end
+			end
+		end
+
+		task.wait(1)
+	end
+end)
+
+EspTab:CreateToggle({
+	Name = "ESP Piggy",
+	CurrentValue = false,
+	Flag = "PiggyESP",
+	Callback = function(Value)
+
+		piggyESP = Value
+
+		if not piggyESP then
+
+			for obj,_ in pairs(piggyObjects) do
+				removePiggyESP(obj)
+			end
+		end
+	end,
+})
