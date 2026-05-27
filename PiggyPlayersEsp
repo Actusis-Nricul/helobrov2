@@ -1,0 +1,112 @@
+local playerESP = false
+local playerESPObjects = {}
+
+local Players = game:GetService("Players")
+
+local function removePlayerESP(plr)
+
+	if playerESPObjects[plr] then
+
+		if playerESPObjects[plr].Highlight then
+			playerESPObjects[plr].Highlight:Destroy()
+		end
+
+		if playerESPObjects[plr].Billboard then
+			playerESPObjects[plr].Billboard:Destroy()
+		end
+
+		playerESPObjects[plr] = nil
+	end
+end
+
+local function createPlayerESP(plr)
+
+	if plr == game.Players.LocalPlayer then
+		return
+	end
+
+	if playerESPObjects[plr] then
+		return
+	end
+
+	local char = plr.Character
+
+	if not char then
+		return
+	end
+
+	local highlight = Instance.new("Highlight")
+
+	highlight.FillColor = Color3.fromRGB(0,170,255)
+	highlight.OutlineColor = Color3.fromRGB(255,255,255)
+
+	highlight.FillTransparency = 0.4
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+	highlight.Adornee = char
+	highlight.Parent = game.CoreGui
+
+	local billboard = Instance.new("BillboardGui")
+
+	billboard.Size = UDim2.new(0,120,0,35)
+	billboard.AlwaysOnTop = true
+	billboard.StudsOffset = Vector3.new(0,4,0)
+
+	billboard.Adornee = char
+	billboard.Parent = game.CoreGui
+
+	local label = Instance.new("TextLabel")
+
+	label.Size = UDim2.new(1,0,1,0)
+
+	label.BackgroundTransparency = 1
+	label.Text = plr.Name
+
+	label.TextColor3 = Color3.fromRGB(0,170,255)
+	label.TextStrokeTransparency = 0
+
+	label.Font = Enum.Font.GothamBold
+	label.TextScaled = true
+
+	label.Parent = billboard
+
+	playerESPObjects[plr] = {
+		Highlight = highlight,
+		Billboard = billboard
+	}
+end
+
+task.spawn(function()
+
+	while true do
+
+		if playerESP then
+
+			for _,plr in pairs(Players:GetPlayers()) do
+
+				if plr ~= Players.LocalPlayer then
+					createPlayerESP(plr)
+				end
+			end
+		end
+
+		task.wait(1)
+	end
+end)
+
+EspTab:CreateToggle({
+	Name = "ESP Players",
+	CurrentValue = false,
+	Flag = "PlayerESP",
+	Callback = function(Value)
+
+		playerESP = Value
+
+		if not playerESP then
+
+			for obj,_ in pairs(playerESPObjects) do
+				removePlayerESP(obj)
+			end
+		end
+	end,
+})
