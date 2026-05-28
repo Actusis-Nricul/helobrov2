@@ -1,7 +1,11 @@
 local UIS = game:GetService("UserInputService")
 
-local espEnabled = false
+local itemESP = false
 local espObjects = {}
+
+---------------------------------------------------
+-- ITEM NAMES
+---------------------------------------------------
 
 local itemNames = {
 	BlueKey = true,
@@ -16,7 +20,10 @@ local itemNames = {
 	Hammer = true,
 	Battery = true,
 	Gun = true,
-	Ammo = true
+	Ammo = true,
+	Bone = true,
+	RedEgg = true,
+	GreenEgg = true
 }
 
 ---------------------------------------------------
@@ -27,18 +34,22 @@ local function findItemFolder()
 
 	for _,folder in pairs(workspace:GetChildren()) do
 
-		if folder:IsA("Folder") or folder:IsA("Model") then
+		if folder:IsA("Folder") then
 
-			local foundItems = 0
+			local found = 0
 
 			for _,v in pairs(folder:GetChildren()) do
 
 				if itemNames[v.Name] then
-					foundItems += 1
+					found += 1
 				end
 			end
 
-			if foundItems >= 3 then
+			---------------------------------------------------
+			-- REAL ITEM FOLDER
+			---------------------------------------------------
+
+			if found >= 3 then
 				return folder
 			end
 		end
@@ -97,7 +108,7 @@ local function createESP(obj)
 end
 
 ---------------------------------------------------
--- REMOVE ESP
+-- REMOVE ALL
 ---------------------------------------------------
 
 local function clearESP()
@@ -117,7 +128,7 @@ local function clearESP()
 end
 
 ---------------------------------------------------
--- TOGGLE WITH U
+-- TOGGLE
 ---------------------------------------------------
 
 UIS.InputBegan:Connect(function(input, gpe)
@@ -128,32 +139,32 @@ UIS.InputBegan:Connect(function(input, gpe)
 
 	if input.KeyCode == Enum.KeyCode.U then
 
-		espEnabled = not espEnabled
+		itemESP = not itemESP
 
 		print("Item ESP:",
-			espEnabled and "ON" or "OFF")
+			itemESP and "ON" or "OFF")
 
-		if not espEnabled then
+		if not itemESP then
 			clearESP()
 		end
 	end
 end)
 
 ---------------------------------------------------
--- MAIN LOOP
+-- LOOP
 ---------------------------------------------------
 
 task.spawn(function()
 
 	while true do
 
-		if espEnabled then
+		if itemESP then
 
-			local itemFolder = findItemFolder()
+			local folder = findItemFolder()
 
-			if itemFolder then
+			if folder then
 
-				for _,v in pairs(itemFolder:GetChildren()) do
+				for _,v in pairs(folder:GetChildren()) do
 
 					if itemNames[v.Name] then
 						createESP(v)
