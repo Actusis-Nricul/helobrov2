@@ -1,5 +1,9 @@
 local espObjects = {}
 
+---------------------------------------------------
+-- COMMON PIGGY ITEMS
+---------------------------------------------------
+
 local itemNames = {
 	BlueKey = true,
 	RedKey = true,
@@ -15,6 +19,40 @@ local itemNames = {
 	Gun = true,
 	Ammo = true
 }
+
+---------------------------------------------------
+-- FIND REAL ITEM FOLDER
+---------------------------------------------------
+
+local function findItemFolder()
+
+	for _,folder in pairs(workspace:GetChildren()) do
+
+		if folder:IsA("Folder") or folder:IsA("Model") then
+
+			local foundItems = 0
+
+			for _,v in pairs(folder:GetChildren()) do
+
+				if itemNames[v.Name] then
+					foundItems += 1
+				end
+			end
+
+			---------------------------------------------------
+			-- IF FOLDER HAS MULTIPLE PIGGY ITEMS
+			---------------------------------------------------
+
+			if foundItems >= 3 then
+				return folder
+			end
+		end
+	end
+end
+
+---------------------------------------------------
+-- CREATE ESP
+---------------------------------------------------
 
 local function createESP(obj)
 
@@ -35,7 +73,7 @@ local function createESP(obj)
 
 	local billboard = Instance.new("BillboardGui")
 
-	billboard.Size = UDim2.new(0,120,0,35)
+	billboard.Size = UDim2.new(0,140,0,35)
 	billboard.AlwaysOnTop = true
 	billboard.StudsOffset = Vector3.new(0,2,0)
 
@@ -60,20 +98,20 @@ local function createESP(obj)
 	espObjects[obj] = true
 end
 
+---------------------------------------------------
+-- MAIN LOOP
+---------------------------------------------------
+
 while task.wait(1) do
 
-	for _,v in pairs(workspace:GetDescendants()) do
+	local itemFolder = findItemFolder()
 
-		if itemNames[v.Name] then
+	if itemFolder then
 
-			if v:IsA("Model") then
+		for _,v in pairs(itemFolder:GetChildren()) do
 
-				local pickup =
-					v:FindFirstChild("ItemPickupScript", true)
-
-				if pickup then
-					createESP(v)
-				end
+			if itemNames[v.Name] then
+				createESP(v)
 			end
 		end
 	end
