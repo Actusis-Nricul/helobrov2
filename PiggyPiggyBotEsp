@@ -1,8 +1,15 @@
+local UIS = game:GetService("UserInputService")
+
+local piggyESP = false
 local espObjects = {}
 
-local function createESP(model)
+---------------------------------------------------
+-- CREATE ESP
+---------------------------------------------------
 
-	if espObjects[model] then
+local function createESP(obj)
+
+	if espObjects[obj] then
 		return
 	end
 
@@ -14,16 +21,16 @@ local function createESP(model)
 	highlight.FillTransparency = 0.35
 	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 
-	highlight.Adornee = model
+	highlight.Adornee = obj
 	highlight.Parent = game.CoreGui
 
 	local billboard = Instance.new("BillboardGui")
 
-	billboard.Size = UDim2.new(0,120,0,35)
+	billboard.Size = UDim2.new(0,140,0,40)
 	billboard.AlwaysOnTop = true
 	billboard.StudsOffset = Vector3.new(0,4,0)
 
-	billboard.Adornee = model
+	billboard.Adornee = obj
 	billboard.Parent = game.CoreGui
 
 	local label = Instance.new("TextLabel")
@@ -31,7 +38,7 @@ local function createESP(model)
 	label.Size = UDim2.new(1,0,1,0)
 
 	label.BackgroundTransparency = 1
-	label.Text = "PIGGY"
+	label.Text = obj.Name
 
 	label.TextColor3 = Color3.fromRGB(255,0,0)
 	label.TextStrokeTransparency = 0
@@ -41,15 +48,76 @@ local function createESP(model)
 
 	label.Parent = billboard
 
-	espObjects[model] = true
+	espObjects[obj] = {
+		Highlight = highlight,
+		Billboard = billboard
+	}
 end
 
-while task.wait(1) do
+---------------------------------------------------
+-- REMOVE ESP
+---------------------------------------------------
 
-	for _,v in pairs(workspace:GetDescendants()) do
+local function clearESP()
 
-		if v.Name == "PiggyBot" and v:IsA("Model") then
-			createESP(v)
+	for _,v in pairs(espObjects) do
+
+		if v.Highlight then
+			v.Highlight:Destroy()
+		end
+
+		if v.Billboard then
+			v.Billboard:Destroy()
 		end
 	end
+
+	espObjects = {}
 end
+
+---------------------------------------------------
+-- TOGGLE WITH J
+---------------------------------------------------
+
+UIS.InputBegan:Connect(function(input, gpe)
+
+	if gpe then
+		return
+	end
+
+	if input.KeyCode == Enum.KeyCode.J then
+
+		piggyESP = not piggyESP
+
+		print("Piggy ESP:",
+			piggyESP and "ON" or "OFF")
+
+		if not piggyESP then
+			clearESP()
+		end
+	end
+end)
+
+---------------------------------------------------
+-- MAIN LOOP
+---------------------------------------------------
+
+task.spawn(function()
+
+	while true do
+
+		if piggyESP then
+
+			local piggyFolder =
+				workspace:FindFirstChild("PiggyNPC")
+
+			if piggyFolder then
+
+				for _,v in pairs(piggyFolder:GetChildren()) do
+					createESP(v)
+				end
+			end
+		end
+
+		task.wait(5)
+	end
+end)
