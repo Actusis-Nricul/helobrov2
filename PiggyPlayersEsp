@@ -1,31 +1,14 @@
-local playerESP = false
-local playerESPObjects = {}
-
 local Players = game:GetService("Players")
 
-local function removePlayerESP(plr)
+local espObjects = {}
 
-	if playerESPObjects[plr] then
+local function createESP(plr)
 
-		if playerESPObjects[plr].Highlight then
-			playerESPObjects[plr].Highlight:Destroy()
-		end
-
-		if playerESPObjects[plr].Billboard then
-			playerESPObjects[plr].Billboard:Destroy()
-		end
-
-		playerESPObjects[plr] = nil
-	end
-end
-
-local function createPlayerESP(plr)
-
-	if plr == game.Players.LocalPlayer then
+	if plr == Players.LocalPlayer then
 		return
 	end
 
-	if playerESPObjects[plr] then
+	if espObjects[plr] then
 		return
 	end
 
@@ -70,43 +53,12 @@ local function createPlayerESP(plr)
 
 	label.Parent = billboard
 
-	playerESPObjects[plr] = {
-		Highlight = highlight,
-		Billboard = billboard
-	}
+	espObjects[plr] = true
 end
 
-task.spawn(function()
+while task.wait(1) do
 
-	while true do
-
-		if playerESP then
-
-			for _,plr in pairs(Players:GetPlayers()) do
-
-				if plr ~= Players.LocalPlayer then
-					createPlayerESP(plr)
-				end
-			end
-		end
-
-		task.wait(1)
+	for _,plr in pairs(Players:GetPlayers()) do
+		createESP(plr)
 	end
-end)
-
-EspTab:CreateToggle({
-	Name = "ESP Players",
-	CurrentValue = false,
-	Flag = "PlayerESP",
-	Callback = function(Value)
-
-		playerESP = Value
-
-		if not playerESP then
-
-			for obj,_ in pairs(playerESPObjects) do
-				removePlayerESP(obj)
-			end
-		end
-	end,
-})
+end
