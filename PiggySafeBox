@@ -1,0 +1,7 @@
+local player = game:GetService("Players").LocalPlayer
+
+local char = player.Character or player.CharacterAdded:Wait()
+
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+hrp.CFrame = CFrame.new(-457, -27, -93)
