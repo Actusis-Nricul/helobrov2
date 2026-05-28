@@ -1,0 +1,61 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+---------------------------------------------------
+-- SAVE ORIGINAL POSITION
+---------------------------------------------------
+
+local originalPosition = hrp.CFrame
+
+---------------------------------------------------
+-- TELEPORT
+---------------------------------------------------
+
+hrp.CFrame = CFrame.new(-375, 0, -88)
+
+print("Teleported")
+
+---------------------------------------------------
+-- RETURN WITH H
+---------------------------------------------------
+
+local connection
+
+connection = UIS.InputBegan:Connect(function(input, gpe)
+
+	if gpe then
+		return
+	end
+
+	if input.KeyCode == Enum.KeyCode.H then
+
+		local character =
+			player.Character
+
+		if character then
+
+			local root =
+				character:FindFirstChild("HumanoidRootPart")
+
+			if root then
+
+				root.CFrame = originalPosition
+
+				print("Returned")
+			end
+		end
+
+		---------------------------------------------------
+		-- FULL CLEANUP
+		---------------------------------------------------
+
+		connection:Disconnect()
+
+		script:Destroy()
+	end
+end)
