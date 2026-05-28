@@ -1,0 +1,105 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+local enabled = false
+
+---------------------------------------------------
+-- TOGGLE WITH Z
+---------------------------------------------------
+
+UIS.InputBegan:Connect(function(input, gpe)
+
+	if gpe then
+		return
+	end
+
+	if input.KeyCode == Enum.KeyCode.Z then
+
+		enabled = not enabled
+
+		print("Teleport To Cursor:",
+			enabled and "ON" or "OFF")
+	end
+end)
+
+---------------------------------------------------
+-- TELEPORT WITH T
+---------------------------------------------------
+
+UIS.InputBegan:Connect(function(input, gpe)
+
+	if gpe then
+		return
+	end
+
+	if input.KeyCode == Enum.KeyCode.T and enabled then
+
+		local char =
+			player.Character
+
+		if char then
+
+			local hrp =
+				char:FindFirstChild("HumanoidRootPart")
+
+			if hrp then
+
+				local camera =
+					workspace.CurrentCamera
+
+				---------------------------------------------------
+				-- CENTER OF SCREEN
+				---------------------------------------------------
+
+				local center =
+					Vector2.new(
+						camera.ViewportSize.X / 2,
+						camera.ViewportSize.Y / 2
+					)
+
+				---------------------------------------------------
+				-- RAYCAST
+				---------------------------------------------------
+
+				local ray =
+					camera:ViewportPointToRay(
+						center.X,
+						center.Y
+					)
+
+				local params =
+					RaycastParams.new()
+
+				params.FilterType =
+					Enum.RaycastFilterType.Blacklist
+
+				params.FilterDescendantsInstances = {
+					char
+				}
+
+				local result =
+					workspace:Raycast(
+						ray.Origin,
+						ray.Direction * 1000,
+						params
+					)
+
+				---------------------------------------------------
+				-- TELEPORT
+				---------------------------------------------------
+
+				if result then
+
+					hrp.CFrame =
+						CFrame.new(
+							result.Position + Vector3.new(0,3,0)
+						)
+
+					print("Teleported")
+				end
+			end
+		end
+	end
+end)
