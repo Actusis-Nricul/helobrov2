@@ -1,25 +1,8 @@
-local piggyESP = false
-local piggyObjects = {}
+local espObjects = {}
 
-local function removePiggyESP(model)
+local function createESP(model)
 
-	if piggyObjects[model] then
-
-		if piggyObjects[model].Highlight then
-			piggyObjects[model].Highlight:Destroy()
-		end
-
-		if piggyObjects[model].Billboard then
-			piggyObjects[model].Billboard:Destroy()
-		end
-
-		piggyObjects[model] = nil
-	end
-end
-
-local function createPiggyESP(model)
-
-	if piggyObjects[model] then
+	if espObjects[model] then
 		return
 	end
 
@@ -58,43 +41,15 @@ local function createPiggyESP(model)
 
 	label.Parent = billboard
 
-	piggyObjects[model] = {
-		Highlight = highlight,
-		Billboard = billboard
-	}
+	espObjects[model] = true
 end
 
-task.spawn(function()
+while task.wait(1) do
 
-	while true do
+	for _,v in pairs(workspace:GetDescendants()) do
 
-		if piggyESP then
-
-			for _,v in pairs(workspace:GetDescendants()) do
-
-				if v.Name == "PiggyBot" and v:IsA("Model") then
-					createPiggyESP(v)
-				end
-			end
+		if v.Name == "PiggyBot" and v:IsA("Model") then
+			createESP(v)
 		end
-
-		task.wait(1)
 	end
-end)
-
-EspTab:CreateToggle({
-	Name = "ESP Piggy",
-	CurrentValue = false,
-	Flag = "PiggyESP",
-	Callback = function(Value)
-
-		piggyESP = Value
-
-		if not piggyESP then
-
-			for obj,_ in pairs(piggyObjects) do
-				removePiggyESP(obj)
-			end
-		end
-	end,
-})
+end
