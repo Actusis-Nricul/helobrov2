@@ -1,4 +1,3 @@
-local itemESP = false
 local espObjects = {}
 
 local itemNames = {
@@ -16,22 +15,6 @@ local itemNames = {
 	Gun = true,
 	Ammo = true
 }
-
-local function removeESP(obj)
-
-	if espObjects[obj] then
-
-		if espObjects[obj].Highlight then
-			espObjects[obj].Highlight:Destroy()
-		end
-
-		if espObjects[obj].Billboard then
-			espObjects[obj].Billboard:Destroy()
-		end
-
-		espObjects[obj] = nil
-	end
-end
 
 local function createESP(obj)
 
@@ -74,54 +57,24 @@ local function createESP(obj)
 
 	label.Parent = billboard
 
-	espObjects[obj] = {
-		Highlight = highlight,
-		Billboard = billboard
-	}
+	espObjects[obj] = true
 end
 
-task.spawn(function()
+while task.wait(1) do
 
-	while true do
+	for _,v in pairs(workspace:GetDescendants()) do
 
-		if itemESP then
+		if itemNames[v.Name] then
 
-			for _,v in pairs(workspace:GetDescendants()) do
+			if v:IsA("Model") then
 
-				if itemNames[v.Name] then
+				local pickup =
+					v:FindFirstChild("ItemPickupScript", true)
 
-					if v:IsA("Model") then
-
-						local pickup =
-							v:FindFirstChild("ItemPickupScript", true)
-
-						if pickup then
-							createESP(v)
-						else
-							removeESP(v)
-						end
-					end
+				if pickup then
+					createESP(v)
 				end
 			end
 		end
-
-		task.wait(1)
 	end
-end)
-
-EspTab:CreateToggle({
-	Name = "ESP Items",
-	CurrentValue = false,
-	Flag = "ItemsESP",
-	Callback = function(Value)
-
-		itemESP = Value
-
-		if not itemESP then
-
-			for obj,_ in pairs(espObjects) do
-				removeESP(obj)
-			end
-		end
-	end,
-})
+end
