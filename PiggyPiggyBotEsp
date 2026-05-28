@@ -55,7 +55,7 @@ local function createESP(obj)
 end
 
 ---------------------------------------------------
--- REMOVE ESP
+-- REMOVE ALL
 ---------------------------------------------------
 
 local function clearESP()
@@ -75,7 +75,7 @@ local function clearESP()
 end
 
 ---------------------------------------------------
--- TOGGLE WITH J
+-- TOGGLE
 ---------------------------------------------------
 
 UIS.InputBegan:Connect(function(input, gpe)
@@ -98,7 +98,7 @@ UIS.InputBegan:Connect(function(input, gpe)
 end)
 
 ---------------------------------------------------
--- MAIN LOOP
+-- LOOP
 ---------------------------------------------------
 
 task.spawn(function()
@@ -107,17 +107,17 @@ task.spawn(function()
 
 		if piggyESP then
 
-			local piggyFolder =
+			local folder =
 				workspace:FindFirstChild("PiggyNPC")
 
-			if piggyFolder then
+			if folder then
 
-				for _,v in pairs(piggyFolder:GetChildren()) do
+				for _,v in pairs(folder:GetChildren()) do
 					createESP(v)
 				end
 			end
 		end
 
-		task.wait(5)
+		task.wait(0.5)
 	end
 end)
