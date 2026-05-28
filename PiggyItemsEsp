@@ -3,10 +3,6 @@ local UIS = game:GetService("UserInputService")
 local itemESP = false
 local espObjects = {}
 
----------------------------------------------------
--- ITEM NAMES
----------------------------------------------------
-
 local itemNames = {
 	BlueKey = true,
 	RedKey = true,
@@ -27,33 +23,48 @@ local itemNames = {
 }
 
 ---------------------------------------------------
--- FIND ITEM FOLDER
+-- FIND ITEM FOLDER ANYWHERE
 ---------------------------------------------------
 
 local function findItemFolder()
 
-	for _,folder in pairs(workspace:GetChildren()) do
+	for _,folder in ipairs(workspace:GetDescendants()) do
 
 		if folder:IsA("Folder") then
 
 			local found = 0
 
-			for _,v in pairs(folder:GetChildren()) do
+			for _,v in ipairs(folder:GetChildren()) do
 
 				if itemNames[v.Name] then
 					found += 1
 				end
 			end
 
-			---------------------------------------------------
-			-- REAL ITEM FOLDER
-			---------------------------------------------------
-
 			if found >= 3 then
 				return folder
 			end
 		end
 	end
+end
+
+---------------------------------------------------
+-- GET PART FOR BILLBOARD
+---------------------------------------------------
+
+local function getPart(obj)
+
+	if obj:IsA("BasePart") then
+		return obj
+	end
+
+	for _,v in ipairs(obj:GetDescendants()) do
+		if v:IsA("BasePart") then
+			return v
+		end
+	end
+
+	return nil
 end
 
 ---------------------------------------------------
@@ -66,39 +77,35 @@ local function createESP(obj)
 		return
 	end
 
-	local highlight = Instance.new("Highlight")
+	local part = getPart(obj)
 
+	if not part then
+		return
+	end
+
+	local highlight = Instance.new("Highlight")
 	highlight.FillColor = Color3.fromRGB(255,255,0)
 	highlight.OutlineColor = Color3.fromRGB(255,255,255)
-
 	highlight.FillTransparency = 0.3
 	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-
 	highlight.Adornee = obj
 	highlight.Parent = game.CoreGui
 
 	local billboard = Instance.new("BillboardGui")
-
 	billboard.Size = UDim2.new(0,140,0,35)
 	billboard.AlwaysOnTop = true
 	billboard.StudsOffset = Vector3.new(0,2,0)
-
-	billboard.Adornee = obj
+	billboard.Adornee = part
 	billboard.Parent = game.CoreGui
 
 	local label = Instance.new("TextLabel")
-
 	label.Size = UDim2.new(1,0,1,0)
-
 	label.BackgroundTransparency = 1
 	label.Text = obj.Name
-
 	label.TextColor3 = Color3.fromRGB(255,255,0)
 	label.TextStrokeTransparency = 0
-
 	label.Font = Enum.Font.GothamBold
 	label.TextScaled = true
-
 	label.Parent = billboard
 
 	espObjects[obj] = {
@@ -108,19 +115,19 @@ local function createESP(obj)
 end
 
 ---------------------------------------------------
--- REMOVE ALL
+-- CLEAR ESP
 ---------------------------------------------------
 
 local function clearESP()
 
-	for _,v in pairs(espObjects) do
+	for _,data in pairs(espObjects) do
 
-		if v.Highlight then
-			v.Highlight:Destroy()
+		if data.Highlight then
+			data.Highlight:Destroy()
 		end
 
-		if v.Billboard then
-			v.Billboard:Destroy()
+		if data.Billboard then
+			data.Billboard:Destroy()
 		end
 	end
 
@@ -128,7 +135,7 @@ local function clearESP()
 end
 
 ---------------------------------------------------
--- TOGGLE
+-- TOGGLE U
 ---------------------------------------------------
 
 UIS.InputBegan:Connect(function(input, gpe)
@@ -145,7 +152,23 @@ UIS.InputBegan:Connect(function(input, gpe)
 			itemESP and "ON" or "OFF")
 
 		if not itemESP then
-			clearESP()
+
+			for _,v in pairs(espObjects) do
+
+				if v.Highlight then
+					v.Highlight:Destroy()
+				end
+
+				if v.Billboard then
+					v.Billboard:Destroy()
+				end
+			end
+
+			---------------------------------------------------
+			-- IMPORTANT
+			---------------------------------------------------
+
+			espObjects = {}
 		end
 	end
 end)
@@ -164,15 +187,15 @@ task.spawn(function()
 
 			if folder then
 
-				for _,v in pairs(folder:GetChildren()) do
+				for _,item in ipairs(folder:GetChildren()) do
 
-					if itemNames[v.Name] then
-						createESP(v)
+					if itemNames[item.Name] then
+						createESP(item)
 					end
 				end
 			end
 		end
 
-		task.wait(0.5)
+		task.wait(0.1)
 	end
 end)
