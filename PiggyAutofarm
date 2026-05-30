@@ -1,0 +1,252 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+local selectedPart = nil
+local selecting = false
+local autoTp = false
+
+---------------------------------------------------
+-- GUI
+---------------------------------------------------
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "PotassiumIsPeak"
+gui.ResetOnSpawn = false
+gui.Parent = player.PlayerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 240, 0, 240)
+frame.Position = UDim2.new(0.5, -120, 0.5, -110)
+frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+Instance.new("UICorner", frame)
+
+---------------------------------------------------
+-- TOP BAR
+---------------------------------------------------
+
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1,0,0,30)
+topBar.BackgroundColor3 = Color3.fromRGB(55,55,55)
+topBar.BorderSizePixel = 0
+topBar.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,-35,1,0)
+title.Position = UDim2.new(0,10,0,0)
+title.BackgroundTransparency = 1
+title.Text = "Piggy Autofarm 55% Work"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = topBar
+
+---------------------------------------------------
+-- CLOSE BUTTON
+---------------------------------------------------
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0,25,0,25)
+closeBtn.Position = UDim2.new(1,-28,0,2)
+closeBtn.Text = "X"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextColor3 = Color3.new(1,1,1)
+closeBtn.BackgroundColor3 = Color3.fromRGB(180,50,50)
+closeBtn.Parent = topBar
+
+Instance.new("UICorner", closeBtn)
+
+closeBtn.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
+
+---------------------------------------------------
+-- DRAGGING
+---------------------------------------------------
+
+local dragging = false
+local dragStart
+local startPos
+
+topBar.InputBegan:Connect(function(input)
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+
+		input.Changed:Connect(function()
+
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+
+		local delta = input.Position - dragStart
+
+		frame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+---------------------------------------------------
+-- BUTTON MAKER
+---------------------------------------------------
+
+local function makeButton(text, y)
+
+	local btn = Instance.new("TextButton")
+
+	btn.Size = UDim2.new(0,220,0,35)
+	btn.Position = UDim2.new(0,10,0,y)
+
+	btn.BackgroundColor3 = Color3.fromRGB(65,65,65)
+	btn.TextColor3 = Color3.new(1,1,1)
+
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.Text = text
+
+	btn.Parent = frame
+
+	Instance.new("UICorner", btn)
+
+	return btn
+end
+
+---------------------------------------------------
+-- BUTTONS
+---------------------------------------------------
+
+local selectBtn = makeButton("Select Part", 40)
+local tpBtn = makeButton("Teleport Once", 80)
+local autoBtn = makeButton("Start Auto TP", 120)
+local stopBtn = makeButton("Stop Auto TP", 160)
+local deleteBtn = makeButton("Delete Selected Part", 200)
+
+---------------------------------------------------
+-- TELEPORT
+---------------------------------------------------
+
+local function teleport()
+
+	if not selectedPart then
+		warn("No part selected")
+		return
+	end
+
+	local char = player.Character
+	if not char then
+		return
+	end
+
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+
+	if hrp then
+		hrp.CFrame = selectedPart.CFrame + Vector3.new(0,3,0)
+	end
+end
+
+---------------------------------------------------
+-- SELECT PART
+---------------------------------------------------
+
+selectBtn.MouseButton1Click:Connect(function()
+
+	selecting = true
+	selectBtn.Text = "Click A Part..."
+end)
+
+mouse.Button1Down:Connect(function()
+
+	if not selecting then
+		return
+	end
+
+	if mouse.Target then
+
+		selectedPart = mouse.Target
+		selecting = false
+
+		selectBtn.Text = "Selected: "..selectedPart.Name
+
+		print("Selected:", selectedPart:GetFullName())
+	end
+end)
+
+---------------------------------------------------
+-- TELEPORT ONCE
+---------------------------------------------------
+
+tpBtn.MouseButton1Click:Connect(function()
+
+	teleport()
+end)
+
+---------------------------------------------------
+-- AUTO TELEPORT
+---------------------------------------------------
+
+autoBtn.MouseButton1Click:Connect(function()
+
+	if autoTp then
+		return
+	end
+
+	autoTp = true
+
+	task.spawn(function()
+
+		while autoTp do
+
+			teleport()
+
+			task.wait(1)
+		end
+	end)
+end)
+
+---------------------------------------------------
+-- STOP AUTO TELEPORT
+---------------------------------------------------
+
+stopBtn.MouseButton1Click:Connect(function()
+
+	autoTp = false
+end)
+
+---------------------------------------------------
+-- DELETE PART
+---------------------------------------------------
+
+deleteBtn.MouseButton1Click:Connect(function()
+
+	if not selectedPart then
+		warn("No part selected")
+		return
+	end
+
+	selectedPart:Destroy()
+
+	selectedPart = nil
+	selectBtn.Text = "Select Part"
+
+	print("Part deleted")
+end)
