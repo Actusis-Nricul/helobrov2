@@ -1,0 +1,33 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local piggy = workspace:FindFirstChild("PiggyNPC")
+if not piggy then
+	return warn("Piggy not found")
+end
+
+local myHRP = character:WaitForChild("HumanoidRootPart")
+local piggyHRP = piggy:FindFirstChild("HumanoidRootPart")
+
+if not piggyHRP then
+	return warn("Piggy HRP not found")
+end
+
+local distance = math.floor((myHRP.Position - piggyHRP.Position).Magnitude)
+
+local gui = Instance.new("ScreenGui")
+gui.Parent = player.PlayerGui
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(0,250,0,60)
+label.Position = UDim2.new(0.5,-125,0.15,0)
+label.BackgroundTransparency = 0.2
+label.TextScaled = true
+label.Font = Enum.Font.GothamBold
+label.TextColor3 = Color3.new(1,1,1)
+label.Text = "Piggy Distance: "..distance.." studs"
+label.Parent = gui
+
+task.wait(4)
+
+gui:Destroy()
