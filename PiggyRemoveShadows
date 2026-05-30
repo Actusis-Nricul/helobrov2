@@ -1,0 +1,12 @@
+local Lighting = game:GetService("Lighting")
+
+Lighting.GlobalShadows = false
+Lighting.ShadowSoftness = 0
+
+for _, v in ipairs(Lighting:GetDescendants()) do
+	if v:IsA("Sky") then
+		v:Destroy()
+	end
+end
+
+print("Shadows removed.")
