@@ -1,0 +1,54 @@
+local maps = {
+	 -- Book 1
+	House = true,
+	Station = true,
+	Gallery = true,
+	Forest = true,
+	School = true,
+	Hospital = true,
+	Metro = true,
+	Carnival = true,
+	City = true,
+	Mall = true,
+	Outpost = true,
+
+	 -- Book 2
+	Alleys = true,
+	Store = true,
+	Refinery = true,
+	["The Safe Place"] = true,
+	Sewers = true,
+	Factory = true,
+	Port = true,
+	Ship = true,
+	Docks = true,
+	Temple = true,
+	Camp = true,
+	Lab = true,
+	Heist = true,
+	Distraction = true,
+	Breakout = true,
+	Mansion = true,
+}
+
+local function wipeMap(map)
+
+	for _, obj in ipairs(map:GetDescendants()) do
+
+		pcall(function()
+			obj:Destroy()
+		end)
+
+	end
+end
+
+while task.wait() do
+
+	for _, obj in ipairs(workspace:GetChildren()) do
+
+		if maps[obj.Name] then
+			wipeMap(obj)
+		end
+
+	end
+end
