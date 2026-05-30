@@ -2,4 +2,4 @@ local player = game:GetService("Players").LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
 
-hrp.CFrame = hrp.CFrame + (hrp.CFrame.LookVector * 6)
+hrp.CFrame = hrp.CFrame + (hrp.CFrame.LookVector * 10)
