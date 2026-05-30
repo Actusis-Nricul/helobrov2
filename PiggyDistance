@@ -1,33 +1,34 @@
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
 
-local piggy = workspace:FindFirstChild("PiggyNPC")
-if not piggy then
-	return warn("Piggy not found")
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+local PiggyFolder = workspace:FindFirstChild("PiggyNPC")
+if not PiggyFolder then return end
+
+local Piggy
+
+for _, v in ipairs(PiggyFolder:GetChildren()) do
+	if v:IsA("Model") and v:FindFirstChildOfClass("Humanoid") then
+		Piggy = v
+		break
+	end
 end
 
-local myHRP = character:WaitForChild("HumanoidRootPart")
-local piggyHRP = piggy:FindFirstChild("HumanoidRootPart")
+if not Piggy then return end
 
-if not piggyHRP then
-	return warn("Piggy HRP not found")
+local PiggyRoot = Piggy:FindFirstChild("HumanoidRootPart") or Piggy.PrimaryPart
+local MyRoot = Character:WaitForChild("HumanoidRootPart")
+
+if PiggyRoot and MyRoot then
+	local Distance = math.floor((MyRoot.Position - PiggyRoot.Position).Magnitude)
+
+	pcall(function()
+		StarterGui:SetCore("SendNotification", {
+			Title = "Piggy Distance",
+			Text = Distance .. " studs away",
+			Duration = 4
+		})
+	end)
 end
-
-local distance = math.floor((myHRP.Position - piggyHRP.Position).Magnitude)
-
-local gui = Instance.new("ScreenGui")
-gui.Parent = player.PlayerGui
-
-local label = Instance.new("TextLabel")
-label.Size = UDim2.new(0,250,0,60)
-label.Position = UDim2.new(0.5,-125,0.15,0)
-label.BackgroundTransparency = 0.2
-label.TextScaled = true
-label.Font = Enum.Font.GothamBold
-label.TextColor3 = Color3.new(1,1,1)
-label.Text = "Piggy Distance: "..distance.." studs"
-label.Parent = gui
-
-task.wait(4)
-
-gui:Destroy()
