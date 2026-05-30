@@ -1,55 +1,27 @@
 local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local itemESP = false
 local espObjects = {}
 
-local itemNames = {
-	BlueKey = true,
-	RedKey = true,
-	GreenKey = true,
-	PurpleKey = true,
-	WhiteKey = true,
-	YellowKey = true,
-	OrangeKey = true,
-	Plank = true,
-	Wrench = true,
-	Hammer = true,
-	Battery = true,
-	Gun = true,
-	Ammo = true,
-	Bone = true,
-	RedEgg = true,
-	GreenEgg = true
-}
-
 ---------------------------------------------------
--- FIND ITEM FOLDER ANYWHERE
+-- FIND NUMERIC FOLDER
 ---------------------------------------------------
 
-local function findItemFolder()
+local function findNumericFolder()
 
-	for _,folder in ipairs(workspace:GetDescendants()) do
+	for _,obj in ipairs(workspace:GetChildren()) do
 
-		if folder:IsA("Folder") then
-
-			local found = 0
-
-			for _,v in ipairs(folder:GetChildren()) do
-
-				if itemNames[v.Name] then
-					found += 1
-				end
-			end
-
-			if found >= 3 then
-				return folder
-			end
+		if obj:IsA("Folder") and tonumber(obj.Name) then
+			return obj
 		end
 	end
+
+	return nil
 end
 
 ---------------------------------------------------
--- GET PART FOR BILLBOARD
+-- GET PART
 ---------------------------------------------------
 
 local function getPart(obj)
@@ -58,7 +30,15 @@ local function getPart(obj)
 		return obj
 	end
 
+	if obj:IsA("Model") then
+
+		if obj.PrimaryPart then
+			return obj.PrimaryPart
+		end
+	end
+
 	for _,v in ipairs(obj:GetDescendants()) do
+
 		if v:IsA("BasePart") then
 			return v
 		end
@@ -86,26 +66,27 @@ local function createESP(obj)
 	local highlight = Instance.new("Highlight")
 	highlight.FillColor = Color3.fromRGB(255,255,0)
 	highlight.OutlineColor = Color3.fromRGB(255,255,255)
-	highlight.FillTransparency = 0.3
+	highlight.FillTransparency = 0.35
 	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 	highlight.Adornee = obj
-	highlight.Parent = game.CoreGui
+	highlight.Parent = game:GetService("CoreGui")
 
 	local billboard = Instance.new("BillboardGui")
-	billboard.Size = UDim2.new(0,140,0,35)
+	billboard.Name = "ItemESP"
+	billboard.Size = UDim2.new(0,150,0,35)
 	billboard.AlwaysOnTop = true
 	billboard.StudsOffset = Vector3.new(0,2,0)
 	billboard.Adornee = part
-	billboard.Parent = game.CoreGui
+	billboard.Parent = game:GetService("CoreGui")
 
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.new(1,0,1,0)
 	label.BackgroundTransparency = 1
 	label.Text = obj.Name
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
 	label.TextColor3 = Color3.fromRGB(255,255,0)
 	label.TextStrokeTransparency = 0
-	label.Font = Enum.Font.GothamBold
-	label.TextScaled = true
 	label.Parent = billboard
 
 	espObjects[obj] = {
@@ -115,7 +96,32 @@ local function createESP(obj)
 end
 
 ---------------------------------------------------
--- CLEAR ESP
+-- REMOVE INVALID ESP
+---------------------------------------------------
+
+local function cleanupESP()
+
+	for obj,data in pairs(espObjects) do
+
+		if not obj
+		or not obj.Parent
+		or not obj:IsDescendantOf(workspace) then
+
+			if data.Highlight then
+				data.Highlight:Destroy()
+			end
+
+			if data.Billboard then
+				data.Billboard:Destroy()
+			end
+
+			espObjects[obj] = nil
+		end
+	end
+end
+
+---------------------------------------------------
+-- CLEAR ALL ESP
 ---------------------------------------------------
 
 local function clearESP()
@@ -131,11 +137,11 @@ local function clearESP()
 		end
 	end
 
-	espObjects = {}
+	table.clear(espObjects)
 end
 
 ---------------------------------------------------
--- TOGGLE U
+-- TOGGLE
 ---------------------------------------------------
 
 UIS.InputBegan:Connect(function(input, gpe)
@@ -148,54 +154,34 @@ UIS.InputBegan:Connect(function(input, gpe)
 
 		itemESP = not itemESP
 
-		print("Item ESP:",
-			itemESP and "ON" or "OFF")
+		print("Item ESP:", itemESP and "ON" or "OFF")
 
 		if not itemESP then
-
-			for _,v in pairs(espObjects) do
-
-				if v.Highlight then
-					v.Highlight:Destroy()
-				end
-
-				if v.Billboard then
-					v.Billboard:Destroy()
-				end
-			end
-
-			---------------------------------------------------
-			-- IMPORTANT
-			---------------------------------------------------
-
-			espObjects = {}
+			clearESP()
 		end
 	end
 end)
 
 ---------------------------------------------------
--- LOOP
+-- EVERY FRAME
 ---------------------------------------------------
 
-task.spawn(function()
+RunService.RenderStepped:Connect(function()
 
-	while true do
+	if not itemESP then
+		return
+	end
 
-		if itemESP then
+	local folder = findNumericFolder()
 
-			local folder = findItemFolder()
+	if not folder then
+		return
+	end
 
-			if folder then
+	cleanupESP()
 
-				for _,item in ipairs(folder:GetChildren()) do
+	for _,item in ipairs(folder:GetChildren()) do
 
-					if itemNames[item.Name] then
-						createESP(item)
-					end
-				end
-			end
-		end
-
-		task.wait(0.1)
+		createESP(item)
 	end
 end)
