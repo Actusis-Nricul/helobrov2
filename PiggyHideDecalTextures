@@ -1,0 +1,7 @@
+for _, v in ipairs(workspace:GetDescendants()) do
+	if v:IsA("Decal") or v:IsA("Texture") then
+		v.Transparency = 1
+	end
+end
+
+print("Textures hidden.")
