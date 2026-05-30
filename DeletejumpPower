@@ -1,0 +1,12 @@
+task.spawn(function()
+
+	while task.wait() do
+
+		local obj = workspace:FindFirstChild("jumpPower")
+
+		if obj then
+			obj:Destroy()
+		end
+	end
+
+end)
