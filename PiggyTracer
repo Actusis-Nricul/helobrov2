@@ -1,0 +1,37 @@
+local player = game.Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local runService = game:GetService("RunService")
+
+local drawingLine = Drawing.new("Line")
+drawingLine.Thickness = 2
+drawingLine.Visible = true
+
+runService.RenderStepped:Connect(function()
+
+	local character = player.Character
+	local piggy = workspace:FindFirstChild("PiggyNPC")
+
+	if not character or not piggy then
+		drawingLine.Visible = false
+		return
+	end
+
+	local myHRP = character:FindFirstChild("HumanoidRootPart")
+	local piggyHRP = piggy:FindFirstChild("HumanoidRootPart")
+
+	if not myHRP or not piggyHRP then
+		drawingLine.Visible = false
+		return
+	end
+
+	local p1, visible1 = camera:WorldToViewportPoint(myHRP.Position)
+	local p2, visible2 = camera:WorldToViewportPoint(piggyHRP.Position)
+
+	if visible1 and visible2 then
+		drawingLine.Visible = true
+		drawingLine.From = Vector2.new(p1.X, p1.Y)
+		drawingLine.To = Vector2.new(p2.X, p2.Y)
+	else
+		drawingLine.Visible = false
+	end
+end)
