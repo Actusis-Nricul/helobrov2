@@ -1,64 +1,71 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
+local LocalPlayer = Players.LocalPlayer
 local espObjects = {}
 
-local function createESP(plr)
+-- Function to create or update the ESP
+local function updateESP(plr)
+    if plr == LocalPlayer then return end
 
-	if plr == Players.LocalPlayer then
-		return
-	end
+    local char = plr.Character
+    if not char then return end
 
-	if espObjects[plr] then
-		return
-	end
+    -- Check if we already have a highlight and billboard for this character
+    if espObjects[plr] and espObjects[plr].Parent == char then
+        return 
+    end
 
-	local char = plr.Character
+    -- Clean up existing ESP for this player if it exists on an old character
+    if espObjects[plr] then espObjects[plr]:Destroy() end
 
-	if not char then
-		return
-	end
+    -- Create a container folder inside the character to hold ESP parts
+    local espContainer = Instance.new("Folder")
+    espContainer.Name = "ESPContainer"
+    espContainer.Parent = char
+    espObjects[plr] = espContainer
 
-	local highlight = Instance.new("Highlight")
+    -- Create Highlight
+    local highlight = Instance.new("Highlight")
+    highlight.FillColor = Color3.fromRGB(0, 170, 255)
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.FillTransparency = 0.4
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Adornee = char
+    highlight.Parent = espContainer
 
-	highlight.FillColor = Color3.fromRGB(0,170,255)
-	highlight.OutlineColor = Color3.fromRGB(255,255,255)
+    -- Create BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Size = UDim2.new(0, 120, 0, 35)
+    billboard.AlwaysOnTop = true
+    billboard.StudsOffset = Vector3.new(0, 4, 0)
+    billboard.Adornee = char.PrimaryPart or char:FindFirstChild("Head")
+    billboard.Parent = espContainer
 
-	highlight.FillTransparency = 0.4
-	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-
-	highlight.Adornee = char
-	highlight.Parent = game.CoreGui
-
-	local billboard = Instance.new("BillboardGui")
-
-	billboard.Size = UDim2.new(0,120,0,35)
-	billboard.AlwaysOnTop = true
-	billboard.StudsOffset = Vector3.new(0,4,0)
-
-	billboard.Adornee = char
-	billboard.Parent = game.CoreGui
-
-	local label = Instance.new("TextLabel")
-
-	label.Size = UDim2.new(1,0,1,0)
-
-	label.BackgroundTransparency = 1
-	label.Text = plr.Name
-
-	label.TextColor3 = Color3.fromRGB(0,170,255)
-	label.TextStrokeTransparency = 0
-
-	label.Font = Enum.Font.GothamBold
-	label.TextScaled = true
-
-	label.Parent = billboard
-
-	espObjects[plr] = true
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = plr.Name
+    label.TextColor3 = Color3.fromRGB(0, 170, 255)
+    label.TextStrokeTransparency = 0
+    label.Font = Enum.Font.GothamBold
+    label.TextScaled = true
+    label.Parent = billboard
 end
 
-while task.wait(1) do
+-- Use RenderStepped to run every single frame
+RunService.RenderStepped:Connect(function()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character then
+            updateESP(plr)
+        end
+    end
+end)
 
-	for _,plr in pairs(Players:GetPlayers()) do
-		createESP(plr)
-	end
-end
+-- Cleanup when player leaves
+Players.PlayerRemoving:Connect(function(plr)
+    if espObjects[plr] then
+        espObjects[plr]:Destroy()
+        espObjects[plr] = nil
+    end
+end)
