@@ -1,0 +1,15 @@
+task.spawn(function()
+
+	while task.wait(0.1) do
+
+		local folder = workspace:FindFirstChild("PiggyNPC")
+
+		if folder then
+
+			for _,v in ipairs(folder:GetChildren()) do
+				v:Destroy()
+			end
+		end
+	end
+
+end)
