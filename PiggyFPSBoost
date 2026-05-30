@@ -1,0 +1,20 @@
+local Lighting = game:GetService("Lighting")
+
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 100000
+Lighting.Brightness = 0
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+
+for _, v in ipairs(Lighting:GetDescendants()) do
+	if v:IsA("BloomEffect")
+	or v:IsA("BlurEffect")
+	or v:IsA("SunRaysEffect")
+	or v:IsA("ColorCorrectionEffect")
+	or v:IsA("DepthOfFieldEffect")
+	or v:IsA("Atmosphere") then
+		v:Destroy()
+	end
+end
+
+print("Lighting FPS boost applied.")
