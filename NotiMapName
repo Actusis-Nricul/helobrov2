@@ -1,0 +1,58 @@
+local StarterGui = game:GetService("StarterGui")
+
+local MapNames = {
+	-- Book 1
+	"House",
+	"Station",
+	"Gallery",
+	"Forest",
+	"School",
+	"Hospital",
+	"Metro",
+	"Carnival",
+	"City",
+	"Mall",
+	"Outpost",
+	"Plant",
+
+	-- Book 2
+	"Alleys",
+	"Store",
+	"Refinery",
+	"The Safe Place",
+	"Sewers",
+	"Factory",
+	"Port",
+	"Ship",
+	"Docks",
+	"Temple",
+	"Camp",
+	"Lab",
+	"Heist",
+	"Distraction",
+	"Breakout",
+	"Mansion",
+}
+
+local FoundMap
+
+for _, MapName in ipairs(MapNames) do
+	local Map = workspace:FindFirstChild(MapName)
+
+	if Map then
+		FoundMap = MapName
+		break
+	end
+end
+
+if FoundMap then
+	pcall(function()
+		game:GetService("StarterGui"):SetCore("SendNotification", {
+			Title = "Current Map",
+			Text = FoundMap,
+			Duration = 4
+		})
+	end)
+else
+	warn("Could not find map.")
+end
