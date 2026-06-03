@@ -1,0 +1,7 @@
+local map = workspace:FindFirstChild("Map")
+
+if map and map:FindFirstChild("Benches") then
+	for _,v in ipairs(map.Benches:GetChildren()) do
+		v:Destroy()
+	end
+end
