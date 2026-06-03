@@ -1,0 +1,18 @@
+local map = workspace:FindFirstChild("Map")
+
+if map then
+
+	local floorroad = map:FindFirstChild("Floor/Roads")
+
+	if floorroad then
+
+			local railing = roads:FindFirstChild("Railing")
+
+			if railing then
+				for _,v in ipairs(railing:GetChildren()) do
+					v:Destroy()
+				end
+			end
+		end
+	end
+end
