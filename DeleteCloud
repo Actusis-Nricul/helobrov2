@@ -1,0 +1,5 @@
+local clouds = workspace.Terrain:FindFirstChildOfClass("Clouds")
+
+if clouds then
+	clouds:Destroy()
+end
