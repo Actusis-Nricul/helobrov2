@@ -1,0 +1,7 @@
+local map = workspace:FindFirstChild("Map")
+
+if map and map:FindFirstChild("InvisibleBorder") then
+	for _,v in ipairs(map.InvisibleBorder:GetChildren()) do
+		v:Destroy()
+	end
+end
