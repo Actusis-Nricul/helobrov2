@@ -1,0 +1,26 @@
+local gameId = game.GameId
+local placeId = game.PlaceId
+
+---------------------------------------------------
+-- PRINT IDS
+---------------------------------------------------
+
+print("========== GAME INFO ==========")
+
+print("Game ID:", gameId)
+print("Place ID:", placeId)
+
+print("================================")
+
+---------------------------------------------------
+-- COPY GAME ID
+---------------------------------------------------
+
+if setclipboard then
+
+	setclipboard(tostring(gameId))
+
+	print("Copied Game ID to clipboard")
+else
+	warn("Executor does not support setclipboard")
+end
