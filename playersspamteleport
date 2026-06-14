@@ -1,0 +1,79 @@
+-- PLAYER TELEPORTER TOGGLE
+-- Run to start, run again to stop
+
+local Players    = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player     = Players.LocalPlayer
+
+-- Toggle off if already running
+if _G.playerTpRunning then
+    _G.playerTpRunning = false
+    print("[Teleporter] Stopped")
+    return
+end
+
+_G.playerTpRunning = true
+print("[Teleporter] Started")
+
+local function getRoot()
+    local c = player.Character
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
+
+local function getTargetRoot(target)
+    local c = target.Character
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
+
+task.spawn(function()
+    task.wait(1)
+
+    local targets = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player then
+            table.insert(targets, p)
+        end
+    end
+
+    if #targets == 0 then
+        print("[Teleporter] No other players found")
+        _G.playerTpRunning = false
+        return
+    end
+
+    print("[Teleporter] Found", #targets, "players to visit")
+
+    for _, target in ipairs(targets) do
+        if not _G.playerTpRunning then break end
+
+        local targetRoot = getTargetRoot(target)
+        if not targetRoot then
+            print("[Teleporter] Skipping", target.Name, "- no character")
+            continue
+        end
+
+        print("[Teleporter] Spamming inside:", target.Name, "for 5s")
+
+        local startTime = tick()
+
+        while _G.playerTpRunning and tick() - startTime < 5 do
+            local root = getRoot()
+            if not root then break end
+
+            targetRoot = getTargetRoot(target)
+            if not targetRoot then break end
+
+            root.CFrame = targetRoot.CFrame
+
+            RunService.Heartbeat:Wait()
+        end
+
+        if not _G.playerTpRunning then break end
+
+        print("[Teleporter] Done with:", target.Name)
+        task.wait(0.2)
+    end
+
+    print("[Teleporter] Finished all players")
+    _G.playerTpRunning = false
+end)
